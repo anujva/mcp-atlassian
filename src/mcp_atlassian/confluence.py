@@ -156,10 +156,12 @@ class ConfluenceFetcher:
 
     def search(self, cql: str, limit: int = 10) -> list[Document]:
         """Search content using Confluence Query Language (CQL)."""
+        logger.info(f"Searching with CQL: {cql}, limit: {limit}")
         try:
             results = self.confluence.cql(cql=cql, limit=limit)
             documents = []
 
+            logger.info(f"Total results found: {results.get('totalSize', 0)}")
             for result in results.get("results", []):
                 content = result.get("content", {})
                 if content.get("type") == "page":
@@ -174,8 +176,10 @@ class ConfluenceFetcher:
 
                     # Use the excerpt as page_content since it's already a good summary
                     documents.append(Document(page_content=result.get("excerpt", ""), metadata=metadata))
+                    logger.debug(f"Added document: {metadata['title']}")
 
+            logger.info(f"Processed {len(documents)} documents")
             return documents
         except Exception as e:
-            logger.error(f"Search failed with error: {str(e)}")
+            logger.error(f"Search failed with error: {str(e)}", exc_info=True)
             return []

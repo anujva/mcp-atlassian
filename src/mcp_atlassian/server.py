@@ -11,8 +11,25 @@ from .confluence import ConfluenceFetcher
 from .jira import JiraFetcher
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+import os
+
+log_directory = "/tmp/log/mcp-atlassian"
+os.makedirs(log_directory, exist_ok=True)
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    filename=os.path.join(log_directory, "mcp-atlassian.log"),
+    filemode="a",
+)
 logger = logging.getLogger("mcp-atlassian")
+
+# Add a StreamHandler to also log to console for critical errors
+console = logging.StreamHandler()
+console.setLevel(logging.CRITICAL)
+formatter = logging.Formatter("%(name)-12s: %(levelname)-8s %(message)s")
+console.setFormatter(formatter)
+logging.getLogger("").addHandler(console)
 
 # Initialize the content fetchers
 confluence_fetcher = ConfluenceFetcher()
@@ -35,7 +52,9 @@ async def list_resources() -> list[Resource]:
                     uri=AnyUrl(f"confluence://{space['key']}"),
                     name=f"Confluence Space: {space['name']}",
                     mimeType="text/plain",
-                    description=space.get("description", {}).get("plain", {}).get("value", ""),
+                    description=space.get("description", {})
+                    .get("plain", {})
+                    .get("value", ""),
                 )
                 for space in spaces
             ]
@@ -100,7 +119,9 @@ async def read_resource(uri: AnyUrl) -> str:
             issues = jira_fetcher.get_project_issues(project_key)
             content = []
             for issue in issues:
-                content.append(f"# {issue.metadata['key']}: {issue.metadata['title']}\n\n{issue.page_content}\n---")
+                content.append(
+                    f"# {issue.metadata['key']}: {issue.metadata['title']}\n\n{issue.page_content}\n---"
+                )
             return "\n\n".join(content)
 
         # Handle specific issue
@@ -122,7 +143,10 @@ async def list_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "query": {"type": "string", "description": "CQL query string (e.g. 'type=page AND space=DEV')"},
+                    "query": {
+                        "type": "string",
+                        "description": "CQL query string (e.g. 'type=page AND space=DEV')",
+                    },
                     "limit": {
                         "type": "number",
                         "description": "Maximum number of results (1-50)",
@@ -155,7 +179,9 @@ async def list_tools() -> list[Tool]:
             description="Get comments for a specific Confluence page",
             inputSchema={
                 "type": "object",
-                "properties": {"page_id": {"type": "string", "description": "Confluence page ID"}},
+                "properties": {
+                    "page_id": {"type": "string", "description": "Confluence page ID"}
+                },
                 "required": ["page_id"],
             },
         ),
@@ -165,8 +191,15 @@ async def list_tools() -> list[Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "issue_key": {"type": "string", "description": "Jira issue key (e.g., 'PROJ-123')"},
-                    "expand": {"type": "string", "description": "Optional fields to expand", "default": None},
+                    "issue_key": {
+                        "type": "string",
+                        "description": "Jira issue key (e.g., 'PROJ-123')",
+                    },
+                    "expand": {
+                        "type": "string",
+                        "description": "Optional fields to expand",
+                        "default": None,
+                    },
                 },
                 "required": ["issue_key"],
             },
@@ -178,7 +211,11 @@ async def list_tools() -> list[Tool]:
                 "type": "object",
                 "properties": {
                     "jql": {"type": "string", "description": "JQL query string"},
-                    "fields": {"type": "string", "description": "Comma-separated fields to return", "default": "*all"},
+                    "fields": {
+                        "type": "string",
+                        "description": "Comma-separated fields to return",
+                        "default": "*all",
+                    },
                     "limit": {
                         "type": "number",
                         "description": "Maximum number of results (1-50)",
@@ -255,10 +292,14 @@ async def call_tool(name: str, arguments: Any) -> Sequence[TextContent]:
                 for comment in comments
             ]
 
-            return [TextContent(type="text", text=json.dumps(formatted_comments, indent=2))]
+            return [
+                TextContent(type="text", text=json.dumps(formatted_comments, indent=2))
+            ]
 
         elif name == "jira_get_issue":
-            doc = jira_fetcher.get_issue(arguments["issue_key"], expand=arguments.get("expand"))
+            doc = jira_fetcher.get_issue(
+                arguments["issue_key"], expand=arguments.get("expand")
+            )
             result = {"content": doc.page_content, "metadata": doc.metadata}
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
@@ -276,7 +317,9 @@ async def call_tool(name: str, arguments: Any) -> Sequence[TextContent]:
                     "created_date": doc.metadata["created_date"],
                     "priority": doc.metadata["priority"],
                     "link": doc.metadata["link"],
-                    "excerpt": doc.page_content[:500] + "..." if len(doc.page_content) > 500 else doc.page_content,
+                    "excerpt": doc.page_content[:500] + "..."
+                    if len(doc.page_content) > 500
+                    else doc.page_content,
                 }
                 for doc in documents
             ]
@@ -284,7 +327,9 @@ async def call_tool(name: str, arguments: Any) -> Sequence[TextContent]:
 
         elif name == "jira_get_project_issues":
             limit = min(int(arguments.get("limit", 10)), 50)
-            documents = jira_fetcher.get_project_issues(arguments["project_key"], limit=limit)
+            documents = jira_fetcher.get_project_issues(
+                arguments["project_key"], limit=limit
+            )
             project_issues = [
                 {
                     "key": doc.metadata["key"],
