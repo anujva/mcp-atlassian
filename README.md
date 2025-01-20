@@ -5,6 +5,7 @@ Model Context Protocol (MCP) server for Atlassian Cloud products (Confluence and
 <a href="https://glama.ai/mcp/servers/kc33m1kh5m"><img width="380" height="200" src="https://glama.ai/mcp/servers/kc33m1kh5m/badge" alt="Atlassian MCP server" /></a>
 
 ## Feature Demo
+
 ![Demo](https://github.com/user-attachments/assets/995d96a8-4cf3-4a03-abe1-a9f6aea27ac0)
 
 ## Features
@@ -28,6 +29,7 @@ Model Context Protocol (MCP) server for Atlassian Cloud products (Confluence and
 #### Confluence Tools
 
 - **confluence_search**
+
   - Search Confluence content using CQL
   - Inputs:
     - `query` (string): CQL query string
@@ -36,6 +38,7 @@ Model Context Protocol (MCP) server for Atlassian Cloud products (Confluence and
     - Array of search results with page_id, title, space, url, last_modified, type, and excerpt
 
 - **confluence_get_page**
+
   - Get content of a specific Confluence page
   - Inputs:
     - `page_id` (string): Confluence page ID
@@ -48,16 +51,18 @@ Model Context Protocol (MCP) server for Atlassian Cloud products (Confluence and
 #### Jira Tools
 
 - **jira_get_issue**
+
   - Get details of a specific Jira issue
   - Inputs:
     - `issue_key` (string): Jira issue key (e.g., 'PROJ-123')
     - `expand` (string, optional): Fields to expand
 
 - **jira_search**
+
   - Search Jira issues using JQL
   - Inputs:
     - `jql` (string): JQL query string
-    - `fields` (string, optional): Comma-separated fields (default: "*all")
+    - `fields` (string, optional): Comma-separated fields (default: "\*all")
     - `limit` (number, optional): Results limit (1-50, default: 10)
 
 - **jira_get_project_issues**
@@ -68,7 +73,7 @@ Model Context Protocol (MCP) server for Atlassian Cloud products (Confluence and
 
 ## Usage with Claude Desktop
 
-1. Get API tokens from: https://id.atlassian.com/manage-profile/security/api-tokens
+1. Get API tokens from: <https://id.atlassian.com/manage-profile/security/api-tokens>
 
 2. Add to your `claude_desktop_config.json`:
 
@@ -99,12 +104,7 @@ Model Context Protocol (MCP) server for Atlassian Cloud products (Confluence and
   "mcpServers": {
     "mcp-atlassian": {
       "command": "uv",
-      "args": [
-        "--directory",
-        "/path/to/mcp-atlassian",
-        "run",
-        "mcp-atlassian"
-      ],
+      "args": ["--directory", "/path/to/mcp-atlassian", "run", "mcp-atlassian"],
       "env": {
         "CONFLUENCE_URL": "https://your-domain.atlassian.net/wiki",
         "CONFLUENCE_USERNAME": "your.email@domain.com",
@@ -117,9 +117,10 @@ Model Context Protocol (MCP) server for Atlassian Cloud products (Confluence and
   }
 }
 ```
-Replace `/path/to/mcp-atlassian` with the actual path where you've cloned the repository.
-</details>
 
+Replace `/path/to/mcp-atlassian` with the actual path where you've cloned the repository.
+
+</details>
 
 ## Security
 
